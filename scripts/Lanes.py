@@ -18,9 +18,9 @@ class FindLanes(object):
         color_binary, combined, RGB,  src, dst, M  = self.combined_threshold_mask(img_RGB)
         
         leftx, lefty, rightx, righty, out_imgS, confidence_left, confidence_right, center_point, cte = self.find_lane_pixels_no_history(combined)
-        left_fitx, right_fitx, out_imgS, left_fit, right_fit = self.fit_polynomial(leftx, lefty, rightx, righty, out_imgS)
+        #left_fitx, right_fitx, out_imgS, left_fit, right_fit = self.fit_polynomial(leftx, lefty, rightx, righty, out_imgS)
         
-        return color_binary, cte # in RGB format
+        return color_binary, cte, confidence_left,confidence_right  # in RGB format
 
     # Undistort image 
     def undistort(self, img, mask = True):    
@@ -213,7 +213,10 @@ class FindLanes(object):
     
     # Finding Polynomial Fit
     def fit_polynomial(self, leftx, lefty, rightx, righty, out_img):
-    
+    	# It is possible there is no polynomial fit possible (rightx, righty are of size 0)
+	#print (len(leftx), len(lefty), len(rightx), len(righty))
+	if (len(rightx) == 0 or len(righty) == 0):
+		return None, None, None, None, None
         ### TO-DO: Fit a second order polynomial to each using `np.polyfit` ###
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)

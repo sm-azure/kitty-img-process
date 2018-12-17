@@ -26,8 +26,12 @@ class ImgCapture(object):
         try:
             # We select bgr8 because its the OpneCV encoding by default
 		cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-		img_RGB, cte = findlines.img_process(cv_image)
-		print(cte)
+		img_RGB, cte, confidence_left,confidence_right = self.findlines.img_process(cv_image)
+		usable = False
+		if(confidence_left >=6 and confidence_right >=6):
+			usable = True
+		print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
+		
         except CvBridgeError as e:
             print(e)
 
