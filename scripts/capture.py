@@ -8,7 +8,7 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
-
+from Lanes import FindLanes
 
 class ImgCapture(object):
 
@@ -17,17 +17,21 @@ class ImgCapture(object):
         self.bridge_object = CvBridge()
         #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",Image,self.camera_callback)
         self.image_sub = rospy.Subscriber("/pylon_camera_node/image_raw/",Image,self.camera_callback)
+	self.findlines = FindLanes("calibrate_matrix.pickle")
+
 
 
     def camera_callback(self,data):
         
         try:
             # We select bgr8 because its the OpneCV encoding by default
-            cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
+		cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
+		img_RGB, cte = findlines.img_process(cv_image)
+		print(cte)
         except CvBridgeError as e:
             print(e)
 
-        cv2.imshow("Image window", cv_image)
+        cv2.imshow("Image window", img_RGB)
         cv2.waitKey(1)
 
 
