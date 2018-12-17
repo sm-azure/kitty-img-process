@@ -8,6 +8,7 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
+from std_msgs.msg import Int16
 from Lanes import FindLanes
 
 class ImgCapture(object):
@@ -17,7 +18,9 @@ class ImgCapture(object):
         self.bridge_object = CvBridge()
         #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",Image,self.camera_callback)
         self.image_sub = rospy.Subscriber("/pylon_camera_node/image_raw/",Image,self.camera_callback)
-	self.findlines = FindLanes("calibrate_matrix.pickle")
+        self.ln_img_pub = rospy.Publisher("/kitt/img_process/image_raw/",Image, queue_size = 1)
+        self.cte_pub = rospy.Publisher("/kitt/img_process/cte/", Int16 , queue_size = 1)
+	    self.findlines = FindLanes("calibrate_matrix.pickle")
 
 
 
@@ -30,13 +33,18 @@ class ImgCapture(object):
 		usable = False
 		if(confidence_left >=6 and confidence_right >=6):
 			usable = True
-		print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
+		    print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
+            image_message = self.bridge_object.cv2_to_imgmsg(img_RGB, encoding="rgb8")
+            self.ln_img_pub.publish(image_message)
+            self.cte_pub.publish(cte)
 		
         except CvBridgeError as e:
             print(e)
 
-        cv2.imshow("Image window", img_RGB)
-        cv2.waitKey(1)
+        #cv2.imshow("Image window", img_RGB)
+        #cv2.waitKey(1)
+        # Send image to topic
+        
 
 
 def main():
