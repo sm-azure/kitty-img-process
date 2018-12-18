@@ -15,16 +15,17 @@ class FindLanes(object):
     def img_process(self, img_BGR):
         # Conver from BGR to RGB to process 
         img_RGB = cv2.cvtColor(img_BGR, cv2.COLOR_BGR2RGB)
-        color_binary, combined, RGB,  src, dst, M  = self.combined_threshold_mask(img_RGB)
+        color_binary, combined, undistort_crop_img ,  src, dst, M, undistort_img  = self.combined_threshold_mask(img_RGB)
         
         leftx, lefty, rightx, righty, out_imgS, confidence_left, confidence_right, center_point, cte = self.find_lane_pixels_no_history(combined)
         #left_fitx, right_fitx, out_imgS, left_fit, right_fit = self.fit_polynomial(leftx, lefty, rightx, righty, out_imgS)
         
-        return color_binary, cte, confidence_left,confidence_right  # in RGB format
+        return color_binary, cte, confidence_left,confidence_right,  undistort_crop_img, undistort_img # in RGB format
 
     # Undistort image 
     def undistort(self, img, mask = True):    
-        return cv2.undistort(img, self._mtx, self._dist, None, self._mtx)
+	return img
+        #return cv2.undistort(img, self._mtx, self._dist, None, self._mtx)
 
     # Create a mask remove side noise
     def apply_transform_mask(self, _img , offset=100, bottom_offset = 100):
@@ -82,7 +83,7 @@ class FindLanes(object):
         # Combined 
         combined[(S==1) ] = 1 # (R_gradx == 1) | 
 
-        return color_binary, combined, RGB,  src, dst, M 
+        return color_binary, combined, RGB,  src, dst, M, img_RGB 
 
     # Finding lane pixels - from Course material. If you dont know anything about the frame
     def find_lane_pixels_no_history(self, binary_warped):
@@ -111,7 +112,7 @@ class FindLanes(object):
         nwindows = 9
 
         # Which row element should the cte be calculated at
-        ncte = 3
+        ncte = 8
         # Set the width of the windows +/- margin
         # Window width exapand to eventually cover atleast half the window
         l_margin = 100

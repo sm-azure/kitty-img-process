@@ -11,6 +11,11 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Int16
 from Lanes import FindLanes
 
+# Hyperparameters
+
+# Confidence level
+min_confidence = 3
+
 class ImgCapture(object):
 
     def __init__(self):
@@ -19,8 +24,10 @@ class ImgCapture(object):
         #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw",Image,self.camera_callback)
         self.image_sub = rospy.Subscriber("/pylon_camera_node/image_raw/",Image,self.camera_callback)
         self.ln_img_pub = rospy.Publisher("/kitt/img_process/image_raw/",Image, queue_size = 1)
+        self.ln_img_undist_pub = rospy.Publisher("/kitt/img_process/undist/",Image, queue_size = 1)
+        self.ln_img_crop_pub = rospy.Publisher("/kitt/img_process/undist/crop",Image, queue_size = 1)
         self.cte_pub = rospy.Publisher("/kitt/img_process/cte/", Int16 , queue_size = 1)
-	    self.findlines = FindLanes("calibrate_matrix.pickle")
+	self.findlines = FindLanes("calibrate_matrix.pickle")
 
 
 
@@ -29,14 +36,18 @@ class ImgCapture(object):
         try:
             # We select bgr8 because its the OpneCV encoding by default
 		cv_image = self.bridge_object.imgmsg_to_cv2(data, desired_encoding="bgr8")
-		img_RGB, cte, confidence_left,confidence_right = self.findlines.img_process(cv_image)
+		img_RGB, cte, confidence_left,confidence_right, undistort_crop_img, undistort_img = self.findlines.img_process(cv_image)
 		usable = False
-		if(confidence_left >=6 and confidence_right >=6):
+		if(confidence_left >=min_confidence and confidence_right >=min_confidence):
 			usable = True
-		    print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
+		    	print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
 			self.cte_pub.publish(cte)
 		image_message = self.bridge_object.cv2_to_imgmsg(img_RGB, encoding="rgb8")
+		image_undist_message = self.bridge_object.cv2_to_imgmsg(undistort_img, encoding="rgb8")
+		image_crop_message = self.bridge_object.cv2_to_imgmsg(undistort_crop_img, encoding="rgb8")
 		self.ln_img_pub.publish(image_message)
+		self.ln_img_undist_pub.publish(image_undist_message)
+		self.ln_img_crop_pub.publish(image_crop_message)
         except CvBridgeError as e:
             print(e)
 
