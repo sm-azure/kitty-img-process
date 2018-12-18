@@ -109,6 +109,9 @@ class FindLanes(object):
         # HYPERPARAMETERS
         # Choose the number of sliding windows
         nwindows = 9
+
+        # Which row element should the cte be calculated at
+        ncte = 3
         # Set the width of the windows +/- margin
         # Window width exapand to eventually cover atleast half the window
         l_margin = 100
@@ -188,7 +191,7 @@ class FindLanes(object):
                 #cte += (left_point + right_point)//2 - binary_warped.shape[1]//2
             
             #Calculate max error
-            if(window == nwindows-1 ):
+            if(window == nwindows- ncte ):
                 cte = (leftx_current + rightx_current)//2 - binary_warped.shape[1]//2
                 
 
