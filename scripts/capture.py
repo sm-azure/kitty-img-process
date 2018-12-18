@@ -20,7 +20,7 @@ class ImgCapture(object):
         self.image_sub = rospy.Subscriber("/pylon_camera_node/image_raw/",Image,self.camera_callback)
         self.ln_img_pub = rospy.Publisher("/kitt/img_process/image_raw/",Image, queue_size = 1)
         self.cte_pub = rospy.Publisher("/kitt/img_process/cte/", Int16 , queue_size = 1)
-	    self.findlines = FindLanes("calibrate_matrix.pickle")
+	self.findlines = FindLanes("calibrate_matrix.pickle")
 
 
 
@@ -33,11 +33,10 @@ class ImgCapture(object):
 		usable = False
 		if(confidence_left >=6 and confidence_right >=6):
 			usable = True
-		    print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
-            image_message = self.bridge_object.cv2_to_imgmsg(img_RGB, encoding="rgb8")
-            self.ln_img_pub.publish(image_message)
-            self.cte_pub.publish(cte)
-		
+		    	print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
+			self.cte_pub.publish(cte)
+		image_message = self.bridge_object.cv2_to_imgmsg(img_RGB, encoding="rgb8")
+		self.ln_img_pub.publish(image_message)
         except CvBridgeError as e:
             print(e)
 
