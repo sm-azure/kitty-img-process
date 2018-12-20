@@ -30,6 +30,8 @@ class ImgCapture(object):
 	self.findlines = FindLanes("calibrate_matrix.pickle")
 
 
+    def resize(self, img, scale):
+	return cv2.resize(img, (0,0), fx=scale, fy=scale)
 
     def camera_callback(self,data):
         
@@ -42,9 +44,9 @@ class ImgCapture(object):
 			usable = True
 		    	print('Usable:{}, CTE:{}, Left Confidence:{}, Right Confidence:{}'.format(usable, cte, confidence_left,confidence_right))
 			self.cte_pub.publish(cte)
-		image_message = self.bridge_object.cv2_to_imgmsg(img_RGB, encoding="rgb8")
-		image_undist_message = self.bridge_object.cv2_to_imgmsg(undistort_img, encoding="rgb8")
-		image_crop_message = self.bridge_object.cv2_to_imgmsg(undistort_crop_img, encoding="rgb8")
+		image_message = self.bridge_object.cv2_to_imgmsg(self.resize(img_RGB,0.25), encoding="rgb8")
+		image_undist_message = self.bridge_object.cv2_to_imgmsg(self.resize(undistort_img,0.25), encoding="rgb8")
+		image_crop_message = self.bridge_object.cv2_to_imgmsg(self.resize(undistort_crop_img,0.25), encoding="rgb8")
 		self.ln_img_pub.publish(image_message)
 		self.ln_img_undist_pub.publish(image_undist_message)
 		self.ln_img_crop_pub.publish(image_crop_message)

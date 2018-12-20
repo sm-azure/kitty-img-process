@@ -38,8 +38,8 @@ class FindLanes(object):
         # Define source points
         src = np.zeros((4, 2), dtype=np.float32)
 
-        src[0] = [430,550]
-        src[1] = [850,550]
+        src[0] = [410,550]
+        src[1] = [870,550]
         src[2] = [1180,960]
         src[3] = [100,960]
         
@@ -60,7 +60,7 @@ class FindLanes(object):
         return src, dst, M, dest_img
 
     # Apply generic threshold for high value targets
-    def apply_threshold_channel(self, _img_channel, thresh=(180, 255)):
+    def apply_threshold_channel(self, _img_channel, thresh=(190, 255)):
         binary = np.zeros_like(_img_channel)
         binary[(_img_channel > thresh[0]) & (_img_channel <= thresh[1])] = 1
         return binary 
@@ -112,7 +112,7 @@ class FindLanes(object):
         nwindows = 9
 
         # Which row element should the cte be calculated at
-        ncte = 8
+        ncte =  6
         # Set the width of the windows +/- margin
         # Window width exapand to eventually cover atleast half the window
         l_margin = 100
